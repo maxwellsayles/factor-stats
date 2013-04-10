@@ -19,87 +19,7 @@ static inline uint64_t current_nanos() {
   return (res.tv_sec * 1000000000ULL) + res.tv_nsec;
 }
 
-
-/**
- * Binary GCD.
- */
-int64_t gcd_binary_s64(int64_t u, int64_t v) {
-  int shift;
-  int64_t t;
-
-  // make sure u and v are positive
-  if (u < 0) u = -u;
-  if (v < 0) v = -v;
-
-  // if either u or v is 0, return the other
-  if (u == 0) return v;
-  if (v == 0) return u;
-
-  // find the greatest power of 2 dividing both u and v
-  shift = lsb_s64(u | v);
-  u >>= shift;
-  v >>= shift;
-
-  // remove all factors of 2 from u
-  u >>= lsb_s64(u);
-
-  // from here on, u is always odd
-  while (v != 0) {
-    // remove all factors of 2 from v
-    v >>= lsb_s64(v);
-
-    // now u and v are both odd, so u-v will be even
-    // let u = min(u,v)
-    // let v = abs(u-v)/2
-    if (u < v) {
-      v = v - u;
-    } else {
-      t = u - v;
-      u = v;
-      v = t;
-    }
-    v >>= 1;
-  }
-
-  return u << shift;
-}
-
-/**
- * Integer square root floored by Halleck's method
- */
-uint64_t sqrt_u64(const uint64_t x) {
-  uint64_t squaredbit;
-  uint64_t remainder;
-  uint64_t root;
-  uint64_t tmp;
-
-  if (x < 1) return 0;
-
-  // Load the binary constant 01 00 00 ... 00, where the number
-  // of zero bits to the right of the single one bit
-  // is even, and the one bit is as far left as is consistant
-  // with that condition.
-  squaredbit = ((uint64_t)1) << (msb_u64(x) & (-2));
-
-  // Form bits of the answer.
-  remainder = x;
-  root = 0;
-  while (squaredbit > 0) {
-    tmp = squaredbit | root;
-    if (remainder >= tmp) {
-      remainder -= tmp;
-      root >>= 1;
-      root |= squaredbit;
-    } else {
-      root >>= 1;
-    }
-    squaredbit >>= 2;
-  }
-
-  return root;
-}
-
-int uissquarerem(uint64_t A, uint64_t* sqrtA) {
+int is_square(uint64_t A, uint64_t* sqrtA) {
   *sqrtA = sqrt_u64(A);
   return *sqrtA * *sqrtA == A;
 }
@@ -327,7 +247,7 @@ uint64_t squfof(uint64_t n) {
       act1 = 0;
     }
     if (act1) {
-      if (uissquarerem((uint64_t) a1, (uint64_t*)&a)) { // square form
+      if (is_square((uint64_t) a1, (uint64_t*)&a)) { // square form
 	// check if this is blacklisted
 	if (a <= L1) {
 	  for (j = 0; j < blp1; j++)
@@ -359,7 +279,7 @@ uint64_t squfof(uint64_t n) {
       act2 = 0;
     }
     if (act2) {
-      if (uissquarerem((uint64_t)a2, (uint64_t*)&a)) { // square form
+      if (is_square((uint64_t)a2, (uint64_t*)&a)) { // square form
 	// check if this is blacklisted
 	if (a <= L2) {
 	  for (j = 0; j < blp2; j++)

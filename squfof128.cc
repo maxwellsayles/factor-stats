@@ -15,11 +15,9 @@
 
 extern "C" {
 #include "liboptarith/gcd_binary_l2r.h"
-#include "liboptarith/math64.h"
 }
 
 #include "liboptarith/s128_c.h"
-#include "liboptarith/u128_c.h"
 
 using namespace std;
 
@@ -27,21 +25,6 @@ static inline uint64_t current_nanos() {
   struct timespec res;
   clock_gettime(CLOCK_MONOTONIC, &res);
   return (res.tv_sec * 1000000000ULL) + res.tv_nsec;
-}
-
-bool is_square(const u128& x) {
-  u128 s = x.sqrt();
-  return s*s == x;
-}
-
-bool is_square(const s128& x) {
-  s128 s = x.sqrt();
-  return s*s == x;
-}
-
-bool is_square(const u128& x, u128* out_sqrt) {
-  *out_sqrt = x.sqrt();
-  return *out_sqrt * *out_sqrt == x;
 }
 
 bool is_square(const s128& x, s128* out_sqrt) {

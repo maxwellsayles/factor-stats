@@ -2,6 +2,8 @@
  * An implementation of squfof taken from the Pari-GP source.
  */
 
+#include "squfof-parigp/squfof128.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -21,13 +23,7 @@ extern "C" {
 
 using namespace std;
 
-static inline uint64_t current_nanos() {
-  struct timespec res;
-  clock_gettime(CLOCK_MONOTONIC, &res);
-  return (res.tv_sec * 1000000000ULL) + res.tv_nsec;
-}
-
-bool is_square(const s128& x, s128* out_sqrt) {
+static inline bool is_square(const s128& x, s128* out_sqrt) {
   *out_sqrt = x.sqrt();
   return *out_sqrt * *out_sqrt == x;
 }
@@ -59,7 +55,7 @@ bool is_square(const s128& x, s128* out_sqrt) {
  * reduced form, whose third member is easiest to recover by going back to D.
  * From this point onwards, we're once again working with single-word numbers.
  * No need to track signs, just work with the abs values of the coefficients. */
-s128 squfof_ambig(s128 a, s128 B, s128 dd, s128 D) {
+static s128 squfof_ambig(s128 a, s128 B, s128 dd, s128 D) {
   s128 b, c, q, qc, qcb, a0, b0, b1, c0;
 
   q = (dd + (B >> 1)) / a;
@@ -112,7 +108,7 @@ s128 squfof_ambig(s128 a, s128 B, s128 dd, s128 D) {
 #define SQUFOF_BLACKLIST_SZ 256
 
 /* assume 2,3,5 do not divide n */
-s128 squfof(s128 n) {
+s128 squfof128(s128 n) {
   s128 d1, d2;
   s128 nm4; // n (mod 4)
   int cnt = 0;
@@ -327,64 +323,4 @@ s128 squfof(s128 n) {
   return 0;
 }
 
-int main(int argc, char** argv) {
-  int failed = 0;
-  uint64_t start_time = 0;
-  uint64_t finish_time = 0;
-  vector<s128> composites;
-
-  if (argc != 2) {
-    printf("Usage: %s <composites.txt>\n", argv[0]);
-    printf("\n");
-    return 0;
-  }
-
-  // read numbers into a vector
-  ifstream f(argv[1]);
-  if (!f.is_open()) {
-    cerr << "Couldn't find file " << argv[1] << endl;
-    return -1;
-  }
-  while (!f.eof()) {
-    string tmp;
-    f >> tmp;
-    if (!f.fail()) {
-      composites.push_back(s128(tmp.c_str()));
-    }
-  }
-  cout << "Factoring " << composites.size() << " composites." << endl;
-  f.close();
-
-  start_time = current_nanos();
-  for (size_t i = 0; i < composites.size(); i++) {
-    s128 N = composites[i];
-    s128 d = squfof(N);
-        
-    if (d == 0 || d == 1 || d == N) {
-      //printf("Failed to factor %"PRIu64"\n", N);
-      failed ++;
-    } else {
-      //printf("%"PRIu64" = %"PRIu64" * %"PRIu64"\n", N, d, N / d);
-      if (N % d != 0) {
-	cout << "Insane N=" << N << ", d=" << d << endl;
-	exit(-1);
-      }
-    }
-        
-  }
-  finish_time = current_nanos();
-
-  printf("Failed to factor %d integers\n", failed);
-  
-  // Extrapolate time based on successes.
-  uint64_t guessed_time =
-    (finish_time - start_time) * composites.size()
-    / (composites.size() - failed);
-
-  printf("Took %0.2f milliseconds for %lu composites.\n", (finish_time - start_time)/1000000.0, composites.size());
-  printf("Extrapolated time = %0.5f seconds.\n", (double)guessed_time / 1000000000.0);
-
-
-  return 0;
-}
 

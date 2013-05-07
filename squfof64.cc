@@ -2,6 +2,8 @@
  * An implementation of squfof taken from the Pari-GP source.
  */
 
+#include "squfof-parigp/squfof64.h"
+
 #include <gmp.h>
 #include <math.h>
 #include <stdint.h>
@@ -10,16 +12,12 @@
 #include <inttypes.h>
 #include <time.h>
 
+extern "C" {
 #include "liboptarith/math64.h"
 #include "liboptarith/gcd_binary_l2r.h"
-
-static inline uint64_t current_nanos() {
-  struct timespec res;
-  clock_gettime(CLOCK_MONOTONIC, &res);
-  return (res.tv_sec * 1000000000ULL) + res.tv_nsec;
 }
 
-int is_square(uint64_t A, uint64_t* sqrtA) {
+static inline int is_square(uint64_t A, uint64_t* sqrtA) {
   *sqrtA = sqrt_u64(A);
   return *sqrtA * *sqrtA == A;
 }
@@ -51,7 +49,7 @@ int is_square(uint64_t A, uint64_t* sqrtA) {
  * reduced form, whose third member is easiest to recover by going back to D.
  * From this point onwards, we're once again working with single-word numbers.
  * No need to track signs, just work with the abs values of the coefficients. */
-int64_t squfof_ambig(int64_t a, int64_t B, int64_t dd, int64_t D) {
+static int64_t squfof_ambig(int64_t a, int64_t B, int64_t dd, int64_t D) {
   int64_t b, c, q, qc, qcb, a0, b0, b1, c0;
 
   q = (dd + (B >> 1)) / a;
@@ -104,7 +102,7 @@ int64_t squfof_ambig(int64_t a, int64_t B, int64_t dd, int64_t D) {
 #define SQUFOF_BLACKLIST_SZ 256
 
 /* assume 2,3,5 do not divide n */
-uint64_t squfof(uint64_t n) {
+uint64_t squfof64(uint64_t n) {
   int64_t d1, d2;
   uint64_t nm4; // n (mod 4)
   int cnt = 0;
@@ -310,74 +308,4 @@ uint64_t squfof(uint64_t n) {
   return 0;
 }
 
-int main(int argc, char** argv) {
-  int i = 0;
-  int count = 0;
-  int t = 0;
-  int failed = 0;
-  uint64_t tmp = 0;    
-  uint64_t start_time = 0;
-  uint64_t finish_time = 0;
-
-  if (argc != 2) {
-    printf("Usage: %s <composites.txt>\n", argv[0]);
-    printf("\n");
-    exit(0);
-  }
-  
-  // read numbers in two passes
-  // first pass determines how many numbers, second pass reads them
-  FILE* f = fopen(argv[1], "r");
-  if (!f) {
-    printf("Couldn't find file '%s'\n", argv[1]);
-    exit(-1);
-  }
-  count = 0;
-  while (!feof(f)) {
-    t = fscanf(f, "%"PRIu64, &tmp);
-    count ++;
-  }
-  count --;
-  fseek(f, 0, SEEK_SET);
-  printf("Factoring %d composites.\n", count);
-
-  // allocate memory and read in the numbers
-  uint64_t* composites = (uint64_t*)malloc(sizeof(uint64_t)*count);
-
-  for (i = 0; i < count; i++) {
-    t = fscanf(f, "%"PRIu64, &composites[i]);
-  }
-
-  fclose(f);
-
-  start_time = current_nanos();
-  for (i = 0; i < count; i++) {
-    uint64_t N = composites[i];
-    uint64_t d = squfof(N);
-        
-    if (d == 0 || d == N || d == 1) {
-      //printf("Failed to factor %"PRIu64"\n", N);
-      failed ++;
-    } else {
-      //printf("%"PRIu64" = %"PRIu64" * %"PRIu64"\n", N, d, N / d);
-      if (N % d) {
-	printf("Insane N=%"PRIu64", d=%"PRIu64"\n", N, d);
-	exit(-1);
-      }
-    }
-  }
-  finish_time = current_nanos();
-
-  free(composites);
-
-  printf("Failed to factor %d integers\n", failed);
-  
-  // Extrapolate time based on successes.
-  uint64_t guessed_time = (finish_time - start_time) * count / (count - failed);
-
-  printf("Took %0.2f milliseconds for %d composites.\n", (finish_time - start_time)/1000000.0, count);
-  printf("Extrapolated time = %0.5f seconds.\n", (double)guessed_time / 1000000000.0);
-
-  return 0;
-}
 

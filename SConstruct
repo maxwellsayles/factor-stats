@@ -1,13 +1,2 @@
-sources = ['squfof64.cc',
-           'squfof128.cc',
-           'squfof.cc',
-           '../liboptarith/liboptarithxx.a',
-           '/usr/local/lib/libgmp.a']
-
-Program(target='squfof',
-        source=sources,
-        CCFLAGS=['-std=c++11', '-O3', '-DNDEBUG'],
-        CPPPATH=['..'],
-        LIBS=['m', 'rt'])
-
-
+SConscript('squfof-parigp/SConscript')
+SConscript('flint-factor/SConscript')

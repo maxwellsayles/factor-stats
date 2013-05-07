@@ -2,30 +2,24 @@
  * An implementation of squfof taken from the Pari-GP source.
  */
 
-#include "squfof-parigp/squfof128.h"
+#include "factor-stats/squfof-parigp/squfof64.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-
-#include <stdlib.h>
 #include <gmp.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <inttypes.h>
 #include <time.h>
 
 extern "C" {
+#include "liboptarith/math64.h"
 #include "liboptarith/gcd_binary_l2r.h"
 }
 
-#include "liboptarith/s128_c.h"
-
-using namespace std;
-
-static inline bool is_square(const s128& x, s128* out_sqrt) {
-  *out_sqrt = x.sqrt();
-  return *out_sqrt * *out_sqrt == x;
+static inline int is_square(uint64_t A, uint64_t* sqrtA) {
+  *sqrtA = sqrt_u64(A);
+  return *sqrtA * *sqrtA == A;
 }
 
 /***********************************************************************/
@@ -55,8 +49,8 @@ static inline bool is_square(const s128& x, s128* out_sqrt) {
  * reduced form, whose third member is easiest to recover by going back to D.
  * From this point onwards, we're once again working with single-word numbers.
  * No need to track signs, just work with the abs values of the coefficients. */
-static s128 squfof_ambig(s128 a, s128 B, s128 dd, s128 D) {
-  s128 b, c, q, qc, qcb, a0, b0, b1, c0;
+static int64_t squfof_ambig(int64_t a, int64_t B, int64_t dd, int64_t D) {
+  int64_t b, c, q, qc, qcb, a0, b0, b1, c0;
 
   q = (dd + (B >> 1)) / a;
   b = ((q * a) << 1) - B;
@@ -95,12 +89,12 @@ static s128 squfof_ambig(s128 a, s128 B, s128 dd, s128 D) {
     /* safeguard against infinite loop: recognize when we've walked the entire
      * cycle in vain. (I don't think this can actually happen -- exercise.) */
     if (b == b0 && a == a0) {
-        return 0;
+      return 0;
     }
 
     b1 = b;
   }
-  q = a.is_odd() ? a : a >> 1;
+  q = a & 1 ? a : a >> 1;
 
   return q;
 }
@@ -108,16 +102,16 @@ static s128 squfof_ambig(s128 a, s128 B, s128 dd, s128 D) {
 #define SQUFOF_BLACKLIST_SZ 256
 
 /* assume 2,3,5 do not divide n */
-s128 squfof128(s128 n) {
-  s128 d1, d2;
-  s128 nm4; // n (mod 4)
+uint64_t squfof64(uint64_t n) {
+  int64_t d1, d2;
+  uint64_t nm4; // n (mod 4)
   int cnt = 0;
-  s128 a1, b1, c1, dd1, L1;
-  s128 a2, b2, c2, dd2, L2;
-  s128 a, q, c, qc, qcb;
-  s128 D1, D2;
-  s128 blacklist1[SQUFOF_BLACKLIST_SZ];
-  s128 blacklist2[SQUFOF_BLACKLIST_SZ];
+  int64_t a1, b1, c1, dd1, L1;
+  int64_t a2, b2, c2, dd2, L2;
+  int64_t a, q, c, qc, qcb;
+  int64_t D1, D2;
+  int64_t blacklist1[SQUFOF_BLACKLIST_SZ];
+  int64_t blacklist2[SQUFOF_BLACKLIST_SZ];
   int blp1 = 0; // black list pointer
   int blp2 = 0;
   int act1 = 1; // is this multiple of N active
@@ -128,25 +122,24 @@ s128 squfof128(s128 n) {
   nm4 = n & 3;
   if (nm4 == 1) { // n = 1 (mod4):  run one iteration on D1 = n, another on D2 = 5n
     D1 = n;
-    D2 = (n << 2) + n;  // n * 5;
-    d2 = D2.sqrt();
+    D2 = 5 * n;
+    d2 = (int64_t)sqrt_u64(D2);
     dd2 = (d2 >> 1) + (d2 & 1);
     b2 = (d2 - 1) | 1; // b1, b2 will always stay odd
   } else { // n = 3 (mod4):  run one iteration on D1 = 3n, another on D2 = 4n
-    D1 = (n << 1) + n;  // n * 3;
-    D2 = n << 2;  // n * 4;
-    dd2 = D2.sqrt();
+    D1 = 3 * n;
+    D2 = 4 * n;
+    dd2 = (int64_t)sqrt_u64(D2);
     d2 = dd2 << 1;
-    b2 = d2; // largest even below d2, will stay even
+    b2 = d2;// & (~1UL); // largest even below d2, will stay even
   }
-  d1 = D1.sqrt();
+  d1 = sqrt_u64(D1);
   b1 = (d1 - 1) | 1; // largest odd number not exceeding d1
 
   c1 = (D1 - b1 * b1) >> 2;
   c2 = (D2 - b2 * b2) >> 2;
-  L1 = d1.sqrt();
-  L2 = d2.sqrt();
-
+  L1 = sqrt_u64(d1);
+  L2 = sqrt_u64(d2);
 
   /* dd1 used to compute floor((d1+b1)/2) as dd1+floor(b1/2), without
    * overflowing the 31bit signed integer size limit. Same for dd2. */
@@ -252,8 +245,7 @@ s128 squfof128(s128 n) {
       act1 = 0;
     }
     if (act1) {
-      //if (uissquarerem((uint64_t) a1, (uint64_t*)&a)) { // square form
-      if (is_square(a1, &a)) {
+      if (is_square((uint64_t) a1, (uint64_t*)&a)) { // square form
 	// check if this is blacklisted
 	if (a <= L1) {
 	  for (j = 0; j < blp1; j++)
@@ -264,10 +256,7 @@ s128 squfof128(s128 n) {
 	}
 	// not blacklisted
 	if (a > 0) {
-	  //	  q = gcd_binary_s64(a, b1); // imprimitive form?
-	  gcd_binary_l2r_u128(reinterpret_cast<u128_t*>(&q),
-			      reinterpret_cast<u128_t*>(&a),
-			      reinterpret_cast<u128_t*>(&b1));
+	  q = gcd_binary_l2r_u64(a, b1); // imprimitive form?
 	  if (q > 1) { /* q^2 divides D1 hence n [ assuming n % 3 != 0 ] */
 	    return q*q;
 	  }
@@ -288,8 +277,7 @@ s128 squfof128(s128 n) {
       act2 = 0;
     }
     if (act2) {
-      //      if (uissquarerem((uint64_t)a2, (uint64_t*)&a)) { // square form
-      if (is_square(a2, &a)) {
+      if (is_square((uint64_t)a2, (uint64_t*)&a)) { // square form
 	// check if this is blacklisted
 	if (a <= L2) {
 	  for (j = 0; j < blp2; j++)
@@ -300,10 +288,7 @@ s128 squfof128(s128 n) {
 	}
 	// not blacklisted
 	if (a > 0) {
-	  //	  q = gcd_binary_l2r_u128(a, b2); // imprimitive form?
-	  gcd_binary_l2r_u128(reinterpret_cast<u128_t*>(&q),
-			      reinterpret_cast<u128_t*>(&a),
-			      reinterpret_cast<u128_t*>(&b2));
+	  q = gcd_binary_l2r_u64(a, b2); // imprimitive form?
 	  /* NB if b2 is even, a is odd, so the gcd is always odd */
 	  if (q > 1) { /* q^2 divides D2 hence n [ assuming n % 5 != 0 ] */
 	    return q*q;

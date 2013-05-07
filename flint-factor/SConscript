@@ -1,0 +1,16 @@
+sources = ['flint-factor.cc',
+           '../factor-stats.cc',
+           '/usr/local/lib/libflint.a',
+           '../../liboptarith/liboptarithxx.a',
+           '/usr/local/lib/libgmp.a']
+
+cpppath = ['../..']
+libs = ['rt', 'm']
+
+Program(target='flint-factor',
+        source=sources,
+        CCFLAGS=['-std=c++11', '-O3', '-Wall', '-Werror', '-DNDEBUG'],
+        CPPPATH=cpppath,
+        LIBS=libs)
+
+	

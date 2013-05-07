@@ -16,8 +16,8 @@
 #include <time.h>
 
 #include "liboptarith/s128_c.h"
-#include "squfof-parigp/squfof64.h"
-#include "squfof-parigp/squfof128.h"
+#include "factor-stats/squfof-parigp/squfof64.h"
+#include "factor-stats/squfof-parigp/squfof128.h"
 
 using namespace std;
 

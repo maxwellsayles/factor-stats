@@ -1,0 +1,10 @@
+sources = ['pari-factor.cc',
+           '../../liboptarith/liboptarithxx.a',
+           '/usr/local/lib/libpari.a',
+           '/usr/local/lib/libgmp.a']
+
+Program(target='pari-factor',
+        source=sources,
+        LIBS=['rt', 'm'],
+        CCFLAGS=['-O3', '-std=c++11'],
+        CPPPATH=['../..'])

@@ -17,7 +17,7 @@
 using namespace std;
 
 string out_filename() {
-  return "fint-timings.dat";
+  return "flint-timings.dat";
 }
 
 s128 factor(s128 x) {
@@ -26,7 +26,9 @@ s128 factor(s128 x) {
 
 int main(int argc, char** argv) {
   for (int i = 16; i <= 100; i += 2) {
-    dobits(i);
+    if (i != 24 && i != 28 && i != 42) {
+      dobits(i);
+    }
   }
 
   return 0;

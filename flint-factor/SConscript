@@ -1,5 +1,5 @@
 sources = ['flint-factor.cc',
-           '../factor-stats.cc',
+           '../libfactor-stats.a',
            '/usr/local/lib/libflint.a',
            '../../liboptarith/liboptarithxx.a',
            '/usr/local/lib/libgmp.a']

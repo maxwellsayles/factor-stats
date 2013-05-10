@@ -93,7 +93,7 @@ void dobits(const int bits) {
 
   // append to output file
   ofstream out;
-  out.open("sspar-timings.dat", ios::out | ios::app);
+  out.open(out_filename().c_str(), ios::out | ios::app);
   out << fixed << setprecision(5);
   out << bits << ", "
       << m0 << ", "

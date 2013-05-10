@@ -8,51 +8,74 @@ using namespace std;
 
 #include <pari/pari.h>
 
+#include "factor-stats/factor-stats.h"
 #include "liboptarith/s128_c.h"
 
-static inline uint64_t current_nanos(void) {
-  struct timespec res;
-  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &res);
-  return (res.tv_sec * 1000000000ULL) + res.tv_nsec;
-}
-
-uint64_t avg(const vector<uint64_t>& xs) {
-  if (xs.size() == 0)
-    return 0;
-  s128 sum = 0;
-  for (uint64_t x : xs) {
-    sum += x;
+// Convert s128 to GEN.
+static inline GEN to_gen(const s128_t* x_) {
+  long s = cmp_s128_s64(x_, 0);
+  s128_t x = *x_;
+  if (s < 0) {
+    neg_s128_s128(&x, &x);
   }
-  return (sum / xs.size()).to_u64();
+  GEN r;
+  if (x.v1 == 0) {
+    r = stoi(x.v0);
+  } else {
+    r = mkintn(4,
+               (uint64_t)(x.v1 >> 32) & 0xFFFFFFFF,
+               (uint64_t)x.v1 & 0xFFFFFFFF,
+               (x.v0 >> 32) & 0xFFFFFFFF,
+               x.v0 & 0xFFFFFFFF);
+  }
+  if (s < 0) setsigne(r, -1);
+  return r;
 }
 
-vector<GEN> readfile(const string& filename) {
-  vector<GEN> res;
-  ifstream f(filename);
-  while (!f.eof()) {
-    string s;
-    f >> s;
-    if (s != "") {
-      res.push_back(strtoi(s.c_str()));
+/// Convert a GEN into an s128_t.
+static void to_s128(s128_t* x, GEN g) {
+  long l = lgefint(g);
+  if (l == 2) {
+    setzero_s128(x);
+  } else if (l == 3) {
+    long* p = int_LSW(g);
+    set_s128_u64(x, *p);
+    if (signe(g) == -1) {
+      neg_s128_s128(x, x);
     }
+  } else if (l == 4) {
+    long* p = int_LSW(g);
+    x->v0 = *p;
+    p = int_nextW(p);
+    x->v1 = *p;
+    if (signe(g) == -1) {
+      neg_s128_s128(x, x);
+    }
+  } else {
+    assert(false);
   }
-  return res;
+}
+
+string out_filename() {
+  return "pari-timings.dat";
+}
+
+s128 factor(s128 x) {
+  pari_sp ltop = avma;
+
+  GEN xg = to_gen(&x);
+  GEN yg = Z_factor(xg);
+  s128_t y;
+  to_s128(&y, yg);
+
+  avma = ltop;
+  return y;
 }
 
 int main(int argc, char** argv) {
   pari_init(1<<30, 10000000);
-  vector<GEN> xs = readfile(argv[1]);
-  vector<uint64_t> times;
-  for (auto x : xs) {
-    uint64_t start = current_nanos();
-    Z_factor(x);
-    times.push_back(current_nanos() - start);
+  for (int i = 16; i <= 100; i += 2) {
+    dobits(i);
   }
-  
-  sort(times.begin(), times.end());
-  cout << "min: " << times[0] << ' ';
-  cout << "max: " << times[times.size()-1] << ' ';
-  cout << "median: " << times[times.size()/2] << ' ';
-  cout << "avg: " << avg(times) << endl;
   return 0;
 }

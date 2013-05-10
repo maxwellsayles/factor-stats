@@ -1,4 +1,5 @@
 sources = ['pari-factor.cc',
+           '../libfactor-stats.a',
            '../../liboptarith/liboptarithxx.a',
            '/usr/local/lib/libpari.a',
            '/usr/local/lib/libgmp.a']

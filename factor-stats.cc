@@ -48,9 +48,11 @@ void time_factoring(vector<double>* times, const vector<s128>& xs) {
   times->clear();
   for (auto x : xs) {
     uint64_t start = current_nanos();
-    factor(x);
-    uint64_t total_time = current_nanos() - start;
-    times->push_back(static_cast<double>(total_time) / 1000);
+    s128 y = factor(x);
+    if (y != 0 && y != 1 && y != x) {
+      uint64_t total_time = current_nanos() - start;
+      times->push_back(static_cast<double>(total_time) / 1000);
+    }
   }
 }
 
@@ -70,9 +72,10 @@ void dobits(const int bits) {
 
   vector<s128> composites;
   read_file_or_die(&composites, filename);
-  cout << "Factoring " << composites.size() << " semiprimes." << endl;
+  cout << "Factoring " << composites.size() << " composites." << endl;
   vector<double> times;
   time_factoring(&times, composites);
+  cout << "Successful for " << times.size() << " composites." << endl;
 
   // Compute stats.
   sort(times.begin(), times.end());

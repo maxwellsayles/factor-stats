@@ -1,6 +1,7 @@
 sources = ['squfof64.cc',
            'squfof128.cc',
            'squfof.cc',
+	   '../libfactor-stats.a',
            '../../liboptarith/liboptarithxx.a',
            '/usr/local/lib/libgmp.a']
 

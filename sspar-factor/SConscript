@@ -1,0 +1,17 @@
+sources = ['sspar-factor.cc',
+           '../factor-stats.cc',
+           '../../libsspar/libsspar.a',
+           '../../libqform/libqform.a',
+           '../../liboptarith/liboptarithxx.a',
+           '/usr/local/lib/libgmp.a']
+
+cpppath = ['../..']
+libs = ['rt', 'm']
+
+Program(target='sspar-factor',
+        source=sources,
+        CCFLAGS=['-std=c++11', '-O3', '-Wall', '-Werror', '-DNDEBUG'],
+        CPPPATH=cpppath,
+        LIBS=libs)
+
+	

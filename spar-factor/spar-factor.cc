@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
   mpz_init(N);
   mpz_init(d);
 
-  for (int i = 16; i <= 40; i += 2) {
+  for (int i = 16; i <= 60; i += 2) {
     dobits(i);
   }
 

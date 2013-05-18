@@ -26,50 +26,51 @@ set output 'factor-sspar-whisker.eps'
 plot 'sspar-factor/sspar-optimized-timings.dat' using 1:3:2:6:5 with candlesticks t 'SuperSPAR'
 
 # avg timings
+set xrange [*:*]
+set yrange [0:25000]
 set output 'factor-average.eps'
 plot 'flint-factor/flint-timings.dat' using 1:7 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:7 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:7 with lines t 'SQUFOF', \
      'spar-factor/spar-vanilla-timings.dat' using 1:7 with lines t 'Vanilla SPAR', \
      'sspar-factor/sspar-optimized-timings.dat' using 1:7 with lines t 'SuperSPAR'
+set yrange [*:*]
 
 set xrange [46:58]
 set output 'factor-average-zoom-left.eps'
 plot 'flint-factor/flint-timings.dat' using 1:7 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:7 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:7 with lines t 'SQUFOF', \
-     'spar-factor/spar-vanilla-timings.dat' using 1:7 with lines t 'Vanilla SPAR', \
-     'sspar-factor/sspar-optimized-timings.dat' using 1:7 with lines t 'SuperSPAR'
+     'sspar-factor/sspar-optimized-timings.dat' using 1:7 with lines t 'SuperSPAR' lc 5
 
 set xrange [58:66]
 set output 'factor-average-zoom-right.eps'
 plot 'flint-factor/flint-timings.dat' using 1:7 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:7 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:7 with lines t 'SQUFOF', \
-     'spar-factor/spar-vanilla-timings.dat' using 1:7 with lines t 'Vanilla SPAR', \
-     'sspar-factor/sspar-optimized-timings.dat' using 1:7 with lines t 'SuperSPAR'
+     'sspar-factor/sspar-optimized-timings.dat' using 1:7 with lines t 'SuperSPAR' lc 5
 
 # median timings
 set xrange [*:*]
+set yrange [0:25000]
 set output 'factor-median.eps'
 plot 'flint-factor/flint-timings.dat' using 1:4 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:4 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:4 with lines t 'SQUFOF', \
      'spar-factor/spar-vanilla-timings.dat' using 1:4 with lines t 'Vanilla SPAR', \
      'sspar-factor/sspar-optimized-timings.dat' using 1:4 with lines t 'SuperSPAR'
+set yrange [*:*]
 
 set xrange [44:58]
 set output 'factor-median-zoom-left.eps'
 plot 'flint-factor/flint-timings.dat' using 1:4 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:4 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:4 with lines t 'SQUFOF', \
-     'spar-factor/spar-vanilla-timings.dat' using 1:4 with lines t 'Vanilla SPAR', \
-     'sspar-factor/sspar-optimized-timings.dat' using 1:4 with lines t 'SuperSPAR'
+     'sspar-factor/sspar-optimized-timings.dat' using 1:4 with lines t 'SuperSPAR' lc 5
 
 set xrange [58:70]
 set output 'factor-median-zoom-right.eps'
 plot 'flint-factor/flint-timings.dat' using 1:4 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:4 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:4 with lines t 'SQUFOF', \
-     'spar-factor/spar-vanilla-timings.dat' using 1:4 with lines t 'Vanilla SPAR', \
-     'sspar-factor/sspar-optimized-timings.dat' using 1:4 with lines t 'SuperSPAR'
+     'sspar-factor/sspar-optimized-timings.dat' using 1:4 with lines t 'SuperSPAR' lc 5

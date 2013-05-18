@@ -50,6 +50,7 @@ plot 'flint-factor/flint-timings.dat' using 1:7 with lines t 'Flint', \
      'sspar-factor/sspar-optimized-timings.dat' using 1:7 with lines t 'SuperSPAR'
 
 # median timings
+set xrange [*:*]
 set output 'factor-median.eps'
 plot 'flint-factor/flint-timings.dat' using 1:4 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:4 with lines t 'Pari', \

@@ -24,7 +24,7 @@ set output 'factor-squfof-whisker.eps'
 plot 'squfof-parigp/squfof-timings.dat' using 1:3:2:6:5 with candlesticks t 'SQUFOF'
 
 set output 'factor-spar-whisker.eps'
-plot 'spar-factor/spar-vanilla-timings.dat' using 1:3:2:6:5 with candlesticks t 'Vanilla SPAR'
+plot 'spar-factor/spar-vanilla-timings.dat' using 1:3:2:6:5 with candlesticks t 'Reference SPAR'
 
 set output 'factor-sspar-whisker.eps'
 plot 'sspar-factor/sspar-optimized-timings.dat' using 1:3:2:6:5 with candlesticks t 'SuperSPAR'
@@ -38,7 +38,7 @@ set output 'factor-average.eps'
 plot 'flint-factor/flint-timings.dat' using 1:7 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:7 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:7 with lines t 'SQUFOF', \
-     'spar-factor/spar-vanilla-timings.dat' using 1:7 with lines t 'Vanilla SPAR', \
+     'spar-factor/spar-vanilla-timings.dat' using 1:7 with lines t 'Reference SPAR', \
      'sspar-factor/sspar-optimized-timings.dat' using 1:7 with lines t 'SuperSPAR'
 set yrange [*:*]
 
@@ -65,7 +65,7 @@ set output 'factor-median.eps'
 plot 'flint-factor/flint-timings.dat' using 1:4 with lines t 'Flint', \
      'pari-factor/pari-timings.dat' using 1:4 with lines t 'Pari', \
      'squfof-parigp/squfof-timings.dat' using 1:4 with lines t 'SQUFOF', \
-     'spar-factor/spar-vanilla-timings.dat' using 1:4 with lines t 'Vanilla SPAR', \
+     'spar-factor/spar-vanilla-timings.dat' using 1:4 with lines t 'Reference SPAR', \
      'sspar-factor/sspar-optimized-timings.dat' using 1:4 with lines t 'SuperSPAR'
 set yrange [*:*]
 
